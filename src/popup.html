@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <title>Coywolf Meta Tags</title>
 </head>
 <body>
   <h1>Coywolf Meta Tags</h1>
+  <div x-data="{ username: '<strong>calebporzio</strong>' }">
+    Username: <span x-html="username"></span>
+</div>
+  <pre x-data x-text="$store.state.metaTags"></pre>
   <img src="img/icon-128.png">
 </body>
 </html>

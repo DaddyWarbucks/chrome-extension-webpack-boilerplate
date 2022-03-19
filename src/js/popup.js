@@ -1,5 +1,19 @@
-import "../css/popup.css";
-import browser from "webextension-polyfill";
+import '../css/popup.css';
+import browser from 'webextension-polyfill';
+import alpine from 'alpinejs';
+
+window.Alpine = alpine;
+
+alpine.store('state', {
+  metaTags: null,
+  setMetaTags(metaTags) {
+    this.metaTags = { ...metaTags };
+  }
+})
+
+alpine.start();
+
+console.log({ alpine })
 
 // Imported so they make it to the build for
 // browser icon usage in manifest
@@ -33,6 +47,7 @@ async function getMetaTags(url) {
 async function main() {
   const url = await getURL();
   const metaTags = await getMetaTags(url);
+  alpine.store('state').setMetaTags(metaTags);
   console.log({ metaTags, url });
 }
 
