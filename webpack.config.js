@@ -27,7 +27,8 @@ var options = {
   },
   output: {
     path: path.join(__dirname, "build"),
-    filename: "[name].bundle.js"
+    filename: "[name].bundle.js",
+    globalObject: "this"
   },
   module: {
     rules: [
@@ -58,6 +59,7 @@ var options = {
     }),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(["NODE_ENV"]),
+    new CopyWebpackPlugin([{ from: "src/js/service-worker.js" }]),
     new CopyWebpackPlugin([{
       from: "src/manifest.json",
       transform: function (content, path) {
@@ -78,11 +80,6 @@ var options = {
       template: path.join(__dirname, "src", "options.html"),
       filename: "options.html",
       chunks: ["options"]
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "background.html"),
-      filename: "background.html",
-      chunks: ["background"]
     }),
     new WriteFilePlugin()
   ]
