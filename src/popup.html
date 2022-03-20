@@ -6,10 +6,29 @@
 </head>
 <body>
   <h1>Coywolf Meta Tags</h1>
-  <div x-data="{ username: '<strong>calebporzio</strong>' }">
-    Username: <span x-html="username"></span>
-</div>
-  <pre x-data x-text="$store.state.metaTags"></pre>
-  <img src="img/icon-128.png">
+  <div id="error" class="hidden"></div>
+  <div id="loading" class="card">
+    <div style="text-align: center;">
+      <img src="/icon-black-128.png"/>
+      <div style="margin-top: 15px;">Loading</div>
+    </div>
+  </div>
+  <div id="preview" class="hidden card">
+    <img id="image" />
+    <div id="no-image" class="hidden">
+      <div class="text-danger">No "og:image" found</div>
+    </div>
+    <div id="title">
+      <span class="text-danger">No "og:title" found</span>
+    </div>
+    <div id="description">
+      <span class="text-danger">No "og:description" found</span>
+    </div>
+    <button id="view-all">View all meta tags</button>
+    <div id="view-all-preview" class="hidden">
+      <pre></pre>
+      <button id="view-all-close">Close</button>
+    </div>
+  </div>
 </body>
 </html>

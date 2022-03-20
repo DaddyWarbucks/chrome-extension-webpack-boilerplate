@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "An extension that allows you to view the preview of meta tags for any website",
   "scripts": {
-    "build": "NODE_ENV=production node utils/build.js",
-    "dev": "NODE_ENV=production node utils/webserver.js"
+    "build": "NODE_ENV=production node webpack/build.js",
+    "dev": "NODE_ENV=production node webpack/webserver.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "3.0.0",
@@ -21,7 +21,7 @@
     "write-file-webpack-plugin": "4.5.1"
   },
   "dependencies": {
-    "alpinejs": "^3.9.1",
+    "cash-dom": "^8.1.1",
     "gmeta": "^1.3.1",
     "webextension-polyfill": "^0.8.0"
   }

@@ -1,7 +1,7 @@
 var webpack = require("webpack"),
     path = require("path"),
     fileSystem = require("fs"),
-    env = require("./utils/env"),
+    env = require("./webpack/env"),
     CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin,
     CopyWebpackPlugin = require("copy-webpack-plugin"),
     HtmlWebpackPlugin = require("html-webpack-plugin"),
@@ -61,6 +61,7 @@ var options = {
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(["NODE_ENV"]),
     new CopyWebpackPlugin([{ from: "src/js/service-worker.js" }]),
+    new CopyWebpackPlugin([{ from: "src/img" }]),
     new CopyWebpackPlugin([{
       from: "src/manifest.json",
       transform: function (content, path) {

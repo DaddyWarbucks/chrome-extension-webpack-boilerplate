@@ -1,24 +1,34 @@
 import '../css/popup.css';
+import { parseMetaTags } from './utils';
 import browser from 'webextension-polyfill';
-import alpine from 'alpinejs';
+import $ from "cash-dom";
 
-window.Alpine = alpine;
-
-alpine.store('state', {
-  metaTags: null,
-  setMetaTags(metaTags) {
-    this.metaTags = { ...metaTags };
+class Coywolf {
+  constructor(initialState) {
+    this.state = { ...initialState };
+    this.listeners = [];
+    this.setState = this.setState.bind(this);
+    this.subscribe = this.subscribe.bind(this);
   }
-})
 
-alpine.start();
+  subscribe(fn) {
+    this.listeners.push(fn);
+    return () => {
+      this.listeners = this.listeners.filter((listener) => listener !== fn);
+    };
+  }
 
-console.log({ alpine })
+  setState(newState) {
+    this.state = { ...this.state, ...newState };
+    this.listeners.forEach((listener) => listener({ ...this.state }));
+  }
+}
 
-// Imported so they make it to the build for
-// browser icon usage in manifest
-import '../img/icon-128.png';
-import '../img/icon-34.png';
+window.coywolf = new Coywolf({
+  loading: true,
+  error: null,
+  data: null
+});
 
 async function getURL() {
   const activeTabs = await browser.tabs.query({
@@ -28,27 +38,78 @@ async function getURL() {
   return activeTabs[0].url;
 }
 
-async function getMetaTags(url) {
-  const { data } = await browser.runtime.sendMessage({
-    action: 'GET_META_TAGS',
-    data: { url }
-  });
-  return data.metaTags
-}
-
-
-// browser.runtime.onMessage.addListener(async (message, sender) => {
-//   const { action, data, ...rest } = message;
-//   if (action === 'GET_HTML_SUCCESS') {
-//     // console.log({ action, data });
-//   }
-// });
-
 async function main() {
-  const url = await getURL();
-  const metaTags = await getMetaTags(url);
-  alpine.store('state').setMetaTags(metaTags);
-  console.log({ metaTags, url });
+  try {
+    const url = await getURL();
+    const metaTags = await parseMetaTags(url);
+    coywolf.setState({
+      loading: false,
+      data: { metaTags }
+    });
+  } catch (error) {
+    coywolf.setState({ error, loading: false });
+  }
 }
 
 main();
+
+coywolf.subscribe((state) => {
+  console.log('State Change: ', state);
+
+  if (state.loading) {
+    $('#error, #preview').addClass('hidden');
+    $('#loading').removeClass('hidden');
+    return;
+  }
+
+  if (state.error) {
+    $('#image, #preview').addClass('hidden');
+    $('#error')
+      .text(state.error.message || 'There was an unexpected error')
+      .removeClass('hidden');
+    return;
+  }
+
+  if (state.data && state.data.metaTags) {
+    const title = state.data.metaTags['og:title'];
+    const description = state.data.metaTags['og:description'];
+    const imageSrc = state.data.metaTags['og:image'];
+
+    $('#error, #loading').addClass('hidden');
+
+    if (imageSrc) {
+      $('#image').attr('src', imageSrc);
+    } else {
+      $('#image').addClass('hidden');
+      $('#no-image').removeClass('hidden');
+    }
+
+    if (title) {
+      $('#title').text(title);
+    }
+
+    if (description) {
+      $('#description').text(description);
+    }
+
+    $('#preview').removeClass('hidden');
+
+    return;
+  }
+
+  $('#image, #preview').addClass('hidden');
+  $('#error')
+    .text('There was an unexpected error. Please try again.')
+    .removeClass('hidden');
+
+});
+
+$('#view-all').on('click', () => {
+  const text = JSON.stringify(coywolf.state.data.metaTags, null, 2);
+  $('#view-all-preview pre').text(text);
+  $('#view-all-preview').removeClass('hidden');
+});
+
+$('#view-all-close').on('click', () => {
+  $('#view-all-preview').addClass('hidden');
+});
